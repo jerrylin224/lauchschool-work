@@ -1,0 +1,13 @@
+numbers = [1, 2, 2, 3]
+numbers.uniq
+
+puts numbers.inspect
+
+
+
+#1
+#2
+#2
+#3
+
+#Because .uniq is not destructive,so it won't mutate the value inside array.

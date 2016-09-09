@@ -1,0 +1,10 @@
+array = [1,2,3,4,5,6]
+
+hash = {}
+
+array.each_with_index { |number,index|  hash[number] = index  }
+
+puts hash
+
+
+#each_with_index: Basically used to make new key-value pair in hash

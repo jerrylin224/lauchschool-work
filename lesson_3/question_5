@@ -1,0 +1,7 @@
+(10..100).include?(42)
+#my answer
+
+(10..100).cover?(42)
+#the solution
+
+#what is the difference?

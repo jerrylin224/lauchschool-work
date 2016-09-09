@@ -1,0 +1,15 @@
+def add_eight(number)
+  number + 8
+end
+
+number = 2
+
+how_deep = "number"
+5.times { how_deep.gsub!("number", "add_eight(number)") }
+
+p eval(how_deep)
+
+#eval:Evaluates the Ruby expression(s) in string
+#eval("number") == number == 2
+#eval(add_eight(number)) == eval(add_eight(2)) = 10 ==> 
+#So eval(how_deep) == eval(add_eight(add_eight(add_eight(add_eight(add_eight(2)))))) == 2 + 8 + 8 + 8 + 8 + 8 == 42 

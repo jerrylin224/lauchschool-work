@@ -1,0 +1,12 @@
+flintstones = { "Fred" => 0, "Wilma" => 1, "Barney" => 2, "Betty" => 3, "BamBam" => 4, "Pebbles" => 5 }
+flintstones.assoc("BamBam")
+
+
+#I dont get it.
+#The definition of .assoc:Searches through an array whose elements are also arrays comparing obj #with the first element of each contained array using obj.==.
+
+#Returns the first contained array that matches (that is, the first associated array), or nil if no #match is found.
+
+#So why it can use to hasg?
+
+#Anyway,memorize it first,then check the forum.

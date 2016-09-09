@@ -1,0 +1,12 @@
+
+what is != and where should you use it? => It means not equal to.Often used while you need to describe a true/false situation.
+
+put ! before something, like !user_name =>  is used to turn any object into the opposite of their boolean equivalent
+
+put ! after something, like words.uniq! =>It means the method will mutate the object
+
+put ? before something => is the ternary operator for if...else
+
+put ? after something => It's part of the method name.
+
+put !! before something, like !!user_name =>It help to show boolean equivalent of object.

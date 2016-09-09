@@ -1,0 +1,7 @@
+array = [1,2,3,4,5,6]
+
+hash = {}
+
+array.each_with_index { |number,index|  hash[number] = index  }
+
+puts hash

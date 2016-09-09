@@ -1,0 +1,7 @@
+["Fred", "Wilma", ["Barney", "Betty"], ["BamBam", "Pebbles"]].flatten!
+
+#It seems .flatten can break all nested array
+
+
+["Fred", "Wilma", ["Barney", "Betty"], ["BamBam", ["Pebbles"]]].flatten!
+#Yes,it can break all the nested array.
