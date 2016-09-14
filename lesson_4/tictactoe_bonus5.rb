@@ -1,4 +1,5 @@
 require 'pry'
+PLAY_MODE = 'choose'.freeze
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
@@ -67,7 +68,10 @@ def computer_places_piece!(brd)
   end
 
   if !square
-    square = 5
+    if brd[5] == INITIAL_MARKER 
+      square = 5
+    else
+    end
   end
   
   if !square
@@ -114,29 +118,56 @@ def joinor(arr, delimiter=', ', word='or')
   arr.size == 2 ? arr.join(' ') : arr.join(delimiter)
 end
 
+def who_goes_first(pick)
+  turn_choice = ''
+  if pick == 'choose'
+    loop do
+      prompt "Type 1 to go first and 2 to go second"
+      turn_choice = gets.chomp
+      break if ["1", "2"].include?(turn_choice)
+      prompt "Please choose either 1 or 2 for the order of your turn."
+    end
+  end
+  if turn_choice == '1'
+    'Player'
+  else
+    'Computer'
+  end
+end
 
+def place_piece!(brd, player)
+  if player == 'Player'
+    prompt "Your turn."
+    player_places_piece!(brd)
+  elsif player == 'Computer'
+    computer_places_piece!(brd)
+  end
+end
 
+def alternate_player(current_player)
+  if current_player == 'Player'
+    'Computer'
+  else
+    'Player'
+  end
+end
 
 player_score = 0
 computer_score = 0
-prompt "Who go first? Type (1)You go first (2)Computer goes first. "
 
-choose = ""
 #You should put the place of variable right,or it won't count.
 loop do
   loop do
-    choose = gets.chomp
     board = initialize_board
-
+    current_player = who_goes_first(PLAY_MODE)
     loop do
       display_board(board, player_score, computer_score)
+      place_piece!(board, current_player)
+      current_player = alternate_player(current_player)
 
-      player_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
-
-      computer_places_piece!(board)
       break if someone_won?(board) || board_full?(board)
     end
+
     display_board(board, player_score, computer_score)
 
     if someone_won?(board)
