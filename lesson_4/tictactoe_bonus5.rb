@@ -13,7 +13,8 @@ end
 
 # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
 def display_board(brd, player_score, computer_score)
-#It's better to show the score when new board is showed.
+# It's better to show the score when new board is showed.
+  system'clear'
   puts "You are #{PLAYER_MARKER}.Computer is #{COMPUTER_MARKER}."
   puts ""
   puts "     |     |"
@@ -45,13 +46,15 @@ end
 def player_places_piece!(brd)
   square = ''
   loop do
-    prompt "Choose a position to place a piece: #{joinor(empty_squares(brd), ', ')}"
+    prompt "Choose a position to place: #{joinor(empty_squares(brd), ', ')}"
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
     prompt "Sorry,it's not a valid choice."
   end
   brd[square] = PLAYER_MARKER
 end
+
+
 
 def computer_places_piece!(brd)
   square = nil
@@ -91,25 +94,20 @@ end
 
 def detect_winner(brd)
   WINNING_LINES.each do |line|
-    if brd[line[0]] == PLAYER_MARKER &&       
-       brd[line[1]] == PLAYER_MARKER &&
-       brd[line[2]] == PLAYER_MARKER
+    if brd.values_at(*line).count(PLAYER_MARKER) == 3
       return 'Player'
-    elsif brd[line[0]] == COMPUTER_MARKER &&
-       brd[line[1]] == COMPUTER_MARKER &&
-       brd[line[2]] == COMPUTER_MARKER
+    elsif brd.values_at(*line).count(COMPUTER_MARKER) == 3
       return 'Computer'
     end
   end
   nil
 end
+
 def find_at_risk_square(line, board, marker)
   if board.values_at(*line).count(marker) == 2
-    board.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-  #When 2X 1O it will turn to nil,so won't affect
-  #&& 是交集啊 line.include?(k) => {1=>"X", 2=>"X", 3=>" "}
-  else
-    nil
+    board.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+  # When 2X 1O it will turn to nil,so won't affect
+  #  line.include?(k) && v == INITIAL_MARKER  will be ' '
   end
 end
 
@@ -152,48 +150,56 @@ def alternate_player(current_player)
   end
 end
 
+def play_again?
+  ans = ''
+  loop do
+    prompt "You wanna play again?(y or n)"
+    ans = gets.chomp
+
+    break if ans.downcase.start_with?('y', 'n')
+    prompt "Sorry,I don't understand.Would you type again?"
+  end
+  if ans.downcase.start_with?('y')
+    return true
+  else
+    return false
+  end
+end
+
 player_score = 0
 computer_score = 0
 
-#You should put the place of variable right,or it won't count.
 loop do
+  board = initialize_board
+  current_player = who_goes_first(PLAY_MODE)
   loop do
-    board = initialize_board
-    current_player = who_goes_first(PLAY_MODE)
-    loop do
-      display_board(board, player_score, computer_score)
-      place_piece!(board, current_player)
-      current_player = alternate_player(current_player)
-
-      break if someone_won?(board) || board_full?(board)
-    end
-
     display_board(board, player_score, computer_score)
+    place_piece!(board, current_player)
+    current_player = alternate_player(current_player)
 
-    if someone_won?(board)
-      prompt "#{detect_winner(board)} won!"
-    else
-      prompt "It's a tie."
-    end
-
-
-    if detect_winner(board) == 'Player'
-      player_score += 1
-    elsif detect_winner(board) == 'Computer'
-      computer_score += 1
-    else
-      player_score += 0
-      computer_score += 0
-    end
-    prompt "player score is #{player_score},computer score is #{computer_score}"
-    break if player_score == 5 || computer_score == 5
-
-    
+    break if someone_won?(board) || board_full?(board)
   end
-  prompt "Play more round? (y or n)"
-  answer = gets.chomp
-  break unless answer.start_with?('y')
+
+  display_board(board, player_score, computer_score)
+
+  if someone_won?(board)
+    prompt "#{detect_winner(board)} won!"
+  else
+    prompt "It's a tie."
+  end
+
+  if detect_winner(board) == 'Player'
+    player_score += 1
+  elsif detect_winner(board) == 'Computer'
+    computer_score += 1
+  else
+    player_score += 0
+    computer_score += 0
+  end
+
+  prompt "player score is #{player_score},computer score is #{computer_score}"
+  break if player_score == 5 || computer_score == 5
+
+  break unless play_again?
 end
-
-prompt ('Thanks for playing tic tac toe.')
-
+prompt "Thanks for playing tic tac toe."
