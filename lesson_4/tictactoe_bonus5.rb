@@ -13,7 +13,6 @@ end
 
 # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
 def display_board(brd, player_score, computer_score)
-# It's better to show the score when new board is showed.
   system'clear'
   puts "You are #{PLAYER_MARKER}.Computer is #{COMPUTER_MARKER}."
   puts ""
@@ -54,32 +53,24 @@ def player_places_piece!(brd)
   brd[square] = PLAYER_MARKER
 end
 
+def find_at_risk_square(brd, marker)
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(marker) == 2
+      return brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+    end
+  end
+  nil
+end
 
+def place_center_square(brd)
+  5 if brd[5] == INITIAL_MARKER
+end
 
 def computer_places_piece!(brd)
-  square = nil
-  WINNING_LINES.each do |line|
-    square = find_at_risk_square(line, brd, COMPUTER_MARKER)
-    break if square
-  end
-
-  if !square#But it seems the probability is not high.
-    WINNING_LINES.each do |line|
-      square = find_at_risk_square(line, brd, PLAYER_MARKER)
-      break if square
-    end
-  end
-
-  if !square
-    if brd[5] == INITIAL_MARKER 
-      square = 5
-    else
-    end
-  end
-  
-  if !square
-    square = empty_squares(brd).sample
-  end
+  square =  find_at_risk_square(brd, COMPUTER_MARKER) ||
+            find_at_risk_square(brd, PLAYER_MARKER) ||
+            place_center_square(brd) ||
+            empty_squares(brd).sample
 
   brd[square] = COMPUTER_MARKER
 end
@@ -101,14 +92,6 @@ def detect_winner(brd)
     end
   end
   nil
-end
-
-def find_at_risk_square(line, board, marker)
-  if board.values_at(*line).count(marker) == 2
-    board.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
-  # When 2X 1O it will turn to nil,so won't affect
-  #  line.include?(k) && v == INITIAL_MARKER  will be ' '
-  end
 end
 
 def joinor(arr, delimiter=', ', word='or')
@@ -155,7 +138,6 @@ def play_again?
   loop do
     prompt "You wanna play again?(y or n)"
     ans = gets.chomp
-
     break if ans.downcase.start_with?('y', 'n')
     prompt "Sorry,I don't understand.Would you type again?"
   end
@@ -197,8 +179,13 @@ loop do
     computer_score += 0
   end
 
+  if player_score == 5
+    prompt "You got 5 point.Good game!"
+  elsif computer_score == 5
+    prompt "Computer got 5 point.Good game!"
+  end
+
   prompt "player score is #{player_score},computer score is #{computer_score}"
-  break if player_score == 5 || computer_score == 5
 
   break unless play_again?
 end
