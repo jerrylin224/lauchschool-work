@@ -149,8 +149,30 @@ def play_again?
   end
 end
 
+def display_score(player)
+
+
+  if detect_winner(board) == 'Player'
+    player_score += 1
+  elsif detect_winner(board) == 'Computer'
+    computer_score += 1
+  end
+
+  if player_score == 5 
+    player ='You'
+  elsif computer_score == 5
+    plyer = 'Computer'
+  else
+  end
+  prompt "#{player} got 5 point.Good game!"
+  prompt "player score is #{player_score},computer score is #{computer_score}"
+  player_score = 0
+  computer_score = 0
+end
+
 player_score = 0
 computer_score = 0
+player = ''
 
 loop do
   board = initialize_board
@@ -171,26 +193,8 @@ loop do
     prompt "It's a tie."
   end
 
-  if detect_winner(board) == 'Player'
-    player_score += 1
-  elsif detect_winner(board) == 'Computer'
-    computer_score += 1
-  else
-    player_score += 0
-    computer_score += 0
-  end
 
-  if player_score == 5
-    prompt "You got 5 point.Good game!"
-    prompt "player score is #{player_score},computer score is #{computer_score}"
-    player_score = 0
-    computer_score = 0
-  elsif computer_score == 5
-    prompt "Computer got 5 point.Good game!"
-    prompt "Player score is #{player_score},Computer score is #{computer_score}"
-    player_score = 0
-    computer_score = 0
-  end
+  display_score(player)
 
   break unless play_again?
 end
