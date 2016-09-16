@@ -56,7 +56,7 @@ end
 def find_at_risk_square(brd, marker)
   WINNING_LINES.each do |line|
     if brd.values_at(*line).count(marker) == 2
-      return brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+      return brd.select { |key, value| line.include?(key) && value == INITIAL_MARKER }.keys.first
     end
   end
   nil
@@ -138,7 +138,8 @@ def play_again?
   loop do
     prompt "You wanna play again?(y or n)"
     ans = gets.chomp
-    break if ans.downcase.start_with?('y', 'n')
+    break if %w(y yes).include?(ans)
+    break if %w(n no).include?(ans)
     prompt "Sorry,I don't understand.Would you type again?"
   end
   if ans.downcase.start_with?('y')
@@ -181,11 +182,15 @@ loop do
 
   if player_score == 5
     prompt "You got 5 point.Good game!"
+    prompt "player score is #{player_score},computer score is #{computer_score}"
+    player_score = 0
+    computer_score = 0
   elsif computer_score == 5
     prompt "Computer got 5 point.Good game!"
+    prompt "Player score is #{player_score},Computer score is #{computer_score}"
+    player_score = 0
+    computer_score = 0
   end
-
-  prompt "player score is #{player_score},computer score is #{computer_score}"
 
   break unless play_again?
 end
