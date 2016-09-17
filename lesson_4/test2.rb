@@ -117,21 +117,18 @@ loop do
 
   # player turn
   loop do
-  deck = initialize_deck
-  player_cards = []
-  dealer_cards = []
 
- 
-
-
-  # initial deal
-  2.times do
-    player_cards << deck.pop
-    dealer_cards << deck.pop
-  end
 
     loop do
-   
+      deck = initialize_deck
+      player_cards = []
+      dealer_cards = []
+
+      # initial deal
+      2.times do
+        player_cards << deck.pop
+        dealer_cards << deck.pop
+      end      
       loop do
         prompt "Dealer has #{dealer_cards[0]} and ?"
         prompt "You have: #{player_cards[0]} and #{player_cards[1]}, for a total of #{total(player_cards)}."
@@ -157,21 +154,51 @@ loop do
 
       if busted?(player_cards)
         record_point!(dealer_cards, player_cards, score)
-
         prompt "Your point is #{score[:player]},dealer's point is #{score[:dealer]}"
-        
         break
       else
         prompt "You stayed at #{player_total}"
       end
+
+      
+      prompt "Dealer turn..."
+
+      loop do
+        prompt "Dealer hits!"
+        dealer_cards << deck.pop
+        prompt "Dealer's cards are now: #{dealer_cards}"
+        break if busted?(dealer_cards) || total(dealer_cards) >= 17
+      end
+
+      dealer_total = total(dealer_cards)
+      loop do
+        if busted?(dealer_cards)
+          prompt "Dealer total is now: #{dealer_total}"
+          prompt "You win!"
+          prompt "Your point is #{score[:player]},dealer's point is #{score[:dealer]}"
+          break
+        else
+          prompt "Dealer stays at #{dealer_total}"
+        end
+      end
+      puts "=============="
+      prompt "Dealer has #{dealer_cards}, for a total of: #{dealer_total}"
+      prompt "Player has #{player_cards}, for a total of: #{player_total}"
+      puts "=============="
+
+      prompt "#{display_result(dealer_cards, player_cards)}"
+      record_point!(dealer_cards, player_cards, score)
+      prompt "Your point is #{score[:player]},dealer's point is #{score[:dealer]}"
+      break if score[:player] == 5 || score[:dealer] == 5
+      prompt "Press enter to continue"
+      gets
+      system 'clear'
     end
 
-    break if score[:player] == 5 || score[:dealer] == 5
-    prompt "Press enter to continue"
-    gets
-    system 'clear'
+   
   end
-    break unless play_again?
+   break unless play_again?
+ 
 
   # dealer turn
 end
