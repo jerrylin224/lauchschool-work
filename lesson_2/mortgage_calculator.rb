@@ -1,37 +1,62 @@
+require 'pry'
+NOT_VALID = "It's not a valid number"
 def prompt(message)
-  puts ("=> #{message}")
+  puts "=> #{message}"
 end
-
 
 def valid_number?(num)
   num.to_i().nonzero?
 end
 
-prompt("Weclcome to mortgage caculator.We are glad to help you.")
-prompt("")
-  loop do
-  prompt("How much is your loan amount?(Plz type in number")
-  amount = gets().chomp().downcase()
-if amount.include? "k"
-    amount * 1000 then
-     break
-  elsif amount.include? "w" 
-    amount * 10000 then 
-    break
-  elsif amount.to_i != 0
-    puts "Please type valid number"
-  else
-    break
-  end
+def integer?(num)
+  num.to_i.to_s == num
 end
-    
 
+def float?(num)
+  num.to_f.to_s == num
+end
 
-prompt("What is your monthly rate?(plz type in floatting number")
-  rate = gets().chomp()
-prompt("How long is your loan duration in months?")
-  duration = gets().chomp()
+def negative?(num)
+  num.to_i > 0
+end
 
- m = amount.to_f*(rate.to_f/(1 - (1 + rate.to_f)**-duration.to_f))
+def number?(num)
+  float?(num) || integer?(num) && negative?(num)
+end
 
-prompt("Your monthly payment should be #{m}")
+prompt "Weclcome to mortgage caculator.We are glad to help you."
+prompt ""
+
+amount = ''
+loop do
+  prompt "How much is your loan amount?(Type 12 for 12k)"
+  amount = gets().chomp()
+  break if number?(amount)
+  prompt NOT_VALID
+end
+
+annual_rate = ''
+loop do
+  prompt "What is your annual interest rate?(Type 8 for 8%)"
+  annual_rate = gets().chomp()
+  break if number?(annual_rate)
+  prompt NOT_VALID
+end
+
+year_duration = ''
+loop do
+  prompt "How long is your loan duration in years?(Type 2 for 2 years)"
+  year_duration = gets().chomp()
+  break if number?(year_duration)
+  prompt NOT_VALID
+end
+
+monthly_rate = annual_rate.to_f() / 100 / 12
+month_duration = year_duration.to_f * 12
+j = monthly_rate
+n = month_duration
+p = amount
+
+m = p.to_f * (j.to_f / (1 - (1 + j.to_f)**-n.to_i))
+
+prompt("Your monthly payment should be #{m}k")
