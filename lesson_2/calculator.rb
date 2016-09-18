@@ -1,8 +1,8 @@
 # So now we are going to make a culculator,which gets
 # the number user type and ask them how they want to
 # operate
-LANGUAGE = 'cn'
-
+LANGUAGE = 'en'
+require 'pry'
 require 'yaml'
 MESSAGES = YAML.load_file('calculator_messages.yml')
 
@@ -10,8 +10,9 @@ def messages(message, lang='en')
   MESSAGES[lang][message]
 end
 
-def prompt(message)
-  puts("=> #{message}")
+def prompt(key)
+  message = messages(key, LANGUAGE)   # make sure the "messages" method is declared above this line
+  Kernel.puts("=> #{message}")
 end
 
 def valid_number?(num)
@@ -43,14 +44,14 @@ def operation_to_message(op)
   end
 end
 
-prompt(messages('welcome', 'cn')) 
+prompt('welcome') 
 
 name = ''
   loop do
     name = gets().chomp()
-
+  
     if name.empty?()
-      prompt(messages('valid_name', 'cn'))
+      prompt('valid_name')
     else
       break
     end
@@ -61,31 +62,31 @@ prompt("Hi #{name}")
 loop do # main loop
   number1 = ''
   loop do
-  prompt(" What is your first number? ")
+  prompt('first_num')
   number1 = gets().chomp()
   if valid_number?(number1)
     break
   else
-    prompt(messages('not_valid', 'cn'))
+    prompt('not_valid')
   end
 
 end
 
   number2 = ''
 loop do
-prompt ("What is your second number?")
+prompt ('second_number')
 number2 = gets().chomp()
 
   if valid_number?(number2)
     break
   else
-    prompt(messages('not_valid', 'cn'))
+    prompt('not_valid')
   end
 end
 
 operator_prompt = <<-ABC
   Let me know what operation you want 
-  (1 add 
+  (1 add  
   (2 substaction 
   (3 multiply 
   (4 divide 
