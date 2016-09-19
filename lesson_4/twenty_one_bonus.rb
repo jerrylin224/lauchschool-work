@@ -95,10 +95,15 @@ def display_score!(score)
 end
 
 def play_again?
-  puts "-------------"
-  prompt "Do you want to play again? (y or n)"
-  answer = gets.chomp
-  answer.downcase.start_with?('y')
+  prompt "-------------"
+  answer = '' # WHY WE ALWAYS NEED TO DO IT?
+  loop do
+    prompt "Do you want to play again? (y or n)"
+    answer = gets.chomp.downcase
+    break if %w(y n).include?(answer)
+    prompt "Sorry,you should type y or n."
+  end
+  return true if answer == 'y'
 end
 
 def display_winner(score)
@@ -106,6 +111,18 @@ def display_winner(score)
     prompt "You got 5 scores,good game!"
   elsif score[:dealer] == WINNING_SCORE
     prompt "Dealer got 5 scores,sorry."
+  end
+end
+
+def display_card_in_hand(player_cards, dealer_cards, player)
+  yr_hand = "You have a total of "
+  dlr_hand = "and dealer has a total of "
+  if player == 'you'
+    prompt "You have: #{player_cards},and a total of #{total(player_cards)}."
+  elsif player == 'dealer'
+    prompt "Dealer has #{dealer_cards},and a total of #{total(dealer_cards)}"
+  elsif player == 'result'
+    prompt "#{yr_hand}#{total(player_cards)},#{dlr_hand}#{total(dealer_cards)}."
   end
 end
 
@@ -135,7 +152,7 @@ loop do
         answer = ''
         loop do
           prompt "You want to (h)it ot (s)tay?"
-          answer = gets.chomp
+          answer = gets.chomp.downcase
           break if ['h', 's'].include?(answer)
           prompt "Sorry,I don't understand..."
         end
@@ -143,7 +160,7 @@ loop do
         if answer == 'h'
           prompt "You got a new card."
           player_cards << deck.pop
-          prompt "You have: #{player_cards},and a total of #{total(player_cards)}."
+          display_card_in_hand(player_cards, dealer_cards, 'you')
           break if busted?(player_cards)
         end
 
@@ -151,14 +168,14 @@ loop do
       end
 
       if busted?(player_cards)
-        prompt "#{display_result(dealer_cards, player_cards)}"
+        prompt display_result(dealer_cards, player_cards).to_s
         break
       end
 
       prompt "Dealer turn..."
 
       loop do
-        prompt "Dealer has #{dealer_cards},and a total of #{total(dealer_cards)}"
+        display_card_in_hand(player_cards, dealer_cards, 'dealer')
         if busted?(dealer_cards)
           break
         elsif total(dealer_cards) >= DEALER_STAY_POINTS
@@ -170,8 +187,8 @@ loop do
           dealer_cards << deck.pop
         end
       end
-      prompt "You have a total of #{total(player_cards)},and dealer has #{total(dealer_cards)}."
-      prompt "#{display_result(dealer_cards, player_cards)}"
+      display_card_in_hand(player_cards, dealer_cards, 'result')
+      prompt display_result(dealer_cards, player_cards).to_s
       break
     end
 
