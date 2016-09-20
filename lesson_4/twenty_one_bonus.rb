@@ -168,7 +168,7 @@ loop do
       end
 
       if busted?(player_cards)
-        prompt display_result(dealer_cards, player_cards).to_s
+        prompt display_result(dealer_cards, player_cards)
         break
       end
 
@@ -188,7 +188,7 @@ loop do
         end
       end
       display_card_in_hand(player_cards, dealer_cards, 'result')
-      prompt display_result(dealer_cards, player_cards).to_s
+      prompt display_result(dealer_cards, player_cards)
       break
     end
 
