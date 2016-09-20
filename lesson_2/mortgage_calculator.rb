@@ -54,6 +54,7 @@ end
 monthly_rate = annual_rate.to_f() / 100 / 12
 month_duration = year_duration.to_f * 12
 
-m = amount.to_f * (monthly_rate / (1 - (1 + monthly_rate)**-month_duration))
+monthly_payment = amount.to_f * (monthly_rate / \
+ (1 - (1 + monthly_rate)**-month_duration))
 
-prompt("Your monthly payment should be #{m}")
+prompt("Your monthly payment should be #{monthly_payment}")
