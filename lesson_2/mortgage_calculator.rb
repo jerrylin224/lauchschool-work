@@ -1,5 +1,5 @@
 require 'pry'
-NOT_VALID = "It's not a valid number"
+NOT_VALID = "Please enter a number greater than 0."
 def prompt(message)
   puts "=> #{message}"
 end
@@ -29,7 +29,7 @@ prompt ""
 
 amount = ''
 loop do
-  prompt "How much is your loan amount?(Type 12 for 12k)"
+  prompt "How much is your loan amount?(Type 12000 for 12000)"
   amount = gets().chomp()
   break if number?(amount)
   prompt NOT_VALID
@@ -53,10 +53,7 @@ end
 
 monthly_rate = annual_rate.to_f() / 100 / 12
 month_duration = year_duration.to_f * 12
-j = monthly_rate
-n = month_duration
-p = amount
 
-m = p.to_f * (j.to_f / (1 - (1 + j.to_f)**-n.to_i))
+m = amount.to_f * (monthly_rate / (1 - (1 + monthly_rate)**-month_duration))
 
-prompt("Your monthly payment should be #{m}k")
+prompt("Your monthly payment should be #{m}")
