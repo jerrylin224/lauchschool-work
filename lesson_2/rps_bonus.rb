@@ -1,24 +1,20 @@
 require 'pry'
 VALID_CHOICE = %w(paper scissors rock lizard spock)
+WINNING_CONDITION = {
+  'rock' => %w(scissors lizard),
+  'paper' => %w(rock spock),
+  'scissors' => %w(paper lizard),
+  'spock' => %w(rock scissors),
+  'lizard' => %w(paper spock)
+}
 
 def prompt(message)
   puts "=> #{message}"
 end
 
-# rubocop:disable Metrics/MethodLength
-def win?(first, second)
-  (first == "scissors" && second == "paper") ||
-  (first == "paper" && second == "rock") ||
-  (first == "rock" && second == "lizard") ||
-  (first == "lizard" && second == "spock") ||
-  (first == "spock" && second == "scissors") ||
-  (first == "scissors" && second == "lizard") ||
-  (first == "lizard" && second == "paper") ||
-  (first == "paper" && second == "spock") ||
-  (first == "spock" && second == "rock") ||
-  (first == "rock" && second == "scissors")
+def win?(player, computer)
+  WINNING_CONDITION[player].include?(computer)
 end
-# rubocop:enable Metrics/MethodLength
 
 def display_point(point)
   prompt "Your point is #{point['player']}," \
