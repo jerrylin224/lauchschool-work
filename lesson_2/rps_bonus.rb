@@ -46,39 +46,47 @@ def winning_point_reach?(point)
   end  
 end
 
-def play_again?
-
+def play_again?(point)
+  answer = ''
+    loop do
+      prompt "Do you want to play again?Type y or n"
+      answer = gets().chomp().downcase
+      break if %w(y n).include?(answer)
+      prompt "You should type y or n"
+    end
+    if answer == 'n'
+      true
+    end
 end
 
-point = {
-  'computer' => 0,
-  'player' => 0
-}
-
 loop do
-  choice = ''
+  point = {
+    'computer' => 0,
+    'player' => 0
+  }
   loop do
-    prompt("Type the first two letter to chose:#{VALID_CHOICE.join(', ')}")
-    choice = gets().chomp()
+    choice = ''
+    loop do
+      system 'clear'
+      prompt("Type the first two letter to chose:#{VALID_CHOICE.join(', ')}")
+      choice = gets().chomp()
 
-    if VALID_CHOICE.include?(choice)
-      break
-    else
-      prompt("Please input a valid choice.")
+      if VALID_CHOICE.include?(choice)
+        break
+      else
+        prompt("Please input a valid choice.")
+      end
     end
-  end
-
-  computer_choice = VALID_CHOICE.sample
-
-  prompt("You chose: #{choice} ;Computer chose: #{computer_choice}")
-  prompt display_result(choice, computer_choice)
-  update_point(choice, computer_choice, point)
-  display_point(point)
-  if winning_point_reach?(point)
-    prompt("Do you want to play again?")
-    answer = gets().chomp()
-    break unless answer.downcase.start_with?("y")
-  end
+    computer_choice = VALID_CHOICE.sample
+    prompt("You chose: #{choice} ;Computer chose: #{computer_choice}")
+    prompt display_result(choice, computer_choice)
+    update_point(choice, computer_choice, point)
+    display_point(point)
+    prompt "Press enter to continue"
+    gets
+    break if winning_point_reach?(point)
+    end
+  break if play_again?(point)
 end
 
 prompt("Thanks for playing,good bye.")
