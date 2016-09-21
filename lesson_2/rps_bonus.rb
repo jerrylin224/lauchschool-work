@@ -32,15 +32,15 @@ def display_result(player, computer)
 end
 
 def update_point(player, computer, point)
-  if display_result(player, computer).start_with?('Y')
+  if win?(player, computer)
     point['player'] += 1
-  elsif display_result(player, computer).start_with?('C')
+  elsif win?(computer, player)
     point['computer'] += 1
   end
 end
 
 def winning_point_reach?(point)
-  true if point['player'] == 5 || point['computer'] == 5
+  point['player'] == 5 || point['computer'] == 5
 end
 
 def play_again?
@@ -51,23 +51,24 @@ def play_again?
     break if %w(y n).include?(answer)
     prompt "You should type y or n"
   end
-  true if answer == 'n'
+  answer == 'n'
 end
 
 def display_winner(point)
   if point['player'] == 5
-    prompt "You won!"
+    prompt "You win!"
   elsif point['computer'] == 5
-    prompt "Comoputer won!"
+    prompt "Computer win!"
   end
 end
 
 def input_choice(word)
-  if word == 'r' then 'rock'
-  elsif word == 'p' then 'paper'
-  elsif word == 'sc' then 'scissors'
-  elsif word == 'l' then return 'lizard'
-  elsif word == 'sp' then return 'spock'
+  case word.downcase 
+  when 'r' then 'rock'
+  when 'p' then 'paper'
+  when 'sc' then 'scissors'
+  when 'l' then 'lizard'
+  when 'sp' then 'spock'
   end
 end
 
@@ -98,10 +99,13 @@ Choose one to play:
       end
     end
     computer_choice = VALID_CHOICE.sample
+
     prompt("You chose: #{choice} ;Computer chose: #{computer_choice}")
+
     prompt display_result(choice, computer_choice)
     update_point(choice, computer_choice, point)
     display_point(point)
+
     prompt "Press enter to continue"
     gets
     system 'clear'
