@@ -5,7 +5,7 @@ WINNING_CONDITION = {
   'scissors' => %w(paper lizard),
   'spock' => %w(rock scissors),
   'lizard' => %w(paper spock)
-}
+}.freeze
 
 LOSING_CONDITION = {
   'rock' => %w(paper spock),
@@ -13,7 +13,7 @@ LOSING_CONDITION = {
   'scissors' => %w(rock spock),
   'spock' => %w(paper lizard),
   'lizard' => %w(scissors spock)
-}
+}.freeze
 class Score
   attr_accessor :value
 
@@ -33,6 +33,7 @@ class Move
   def initialize(value)
     @value = value
   end
+
   def to_s
     @value
   end
@@ -50,7 +51,6 @@ class Player
   attr_accessor :move, :name, :score, :history, :percentage, :personalities
 
   def initialize
-    # binding.pry
     set_name
     self.score = Score.new
     @history = []
@@ -59,8 +59,8 @@ class Player
 
   def move_choosen_percentage
     hash = {}
-    self.history.each do |move|
-      hash[move] = self.history.count(move).to_f / self.history.size
+    history.each do |move|
+      hash[move] = history.count(move).to_f / history.size
     end
     hash
   end
@@ -72,8 +72,6 @@ class Player
     when 'The Thing' then TheThing.new
     end
   end
-
-
 end
 
 class Human < Player
@@ -89,12 +87,11 @@ class Human < Player
     self.name = n
   end
 
-    def human_percentage_over_50
-    result = self.move_choosen_percentage.select do |move, percentage|
+  def human_percentage_over_50
+    result = move_choosen_percentage.select do |_, percentage|
       percentage >= 0.6
     end
-    # binding.pry
-    @@human_percentage = result.keys.shuffle.first
+    @@human_percentage = result.keys.sample
   end
 
   def choose
@@ -107,40 +104,29 @@ class Human < Player
       puts "Invalid choice."
     end
     self.move = Move.new(choice)
-    self.history << self.move.value
+    history << move.value
     RPSGame.clear_screen
   end
 end
 
 class Computer < Player
-  attr_accessor :personalities
-
   def set_name
-    # binding.pry
-    self.name = ['The Thing'].sample
-    self.personalities = decide_personality(self.name) # R2D2.new
+    self.name = ['R2D2', 'Siri', 'The Thing'].sample
+    self.personalities = decide_personality(name)
   end
 
-
-
-
   def choose
-    # binding.pry
-    # @personalities = decide_personality('R2D2')
-    if @@human_percentage != nil
+    if !@@human_percentage.nil?
       self.move = Move.new(LOSING_CONDITION[@@human_percentage].sample)
     else
-      # self.move = Move.new(Move::VALUES.sample)
-      # binding.pry
-      self.move = Move.new(self.personalities.default)
+      self.move = Move.new(personalities.default)
     end
-    self.history << self.move.value
+    history << move.value
   end
 end
 
 class R2D2 < Computer
   def initialize
-    # @personalities = ''
   end
 
   def default
@@ -154,7 +140,6 @@ end
 
 class Siri < Computer
   def initialize
-    # @personalities = ''
   end
 
   def default
@@ -168,8 +153,8 @@ end
 
 class TheThing < Computer
   def initialize
-    # @personalities = ''
   end
+
   def default
     'rock'
   end
@@ -216,12 +201,16 @@ class RPSGame
     end
   end
 
-
   def update_score
     case decide_round_winner
     when :human then human.score.increment_score
     when :computer then computer.score.increment_score
     end
+  end
+
+  def reset_score
+    human.score.value = 0
+    computer.score.value = 0
   end
 
   def reach_winning_score?
@@ -237,16 +226,15 @@ class RPSGame
     puts "How many scores should we play until?"
     scores = 0
     loop do
-      scores = gets.chomp.to_i
-      break if scores > 0
+      scores = gets.chomp
+      break if !(scores =~ /\D/) && scores.to_i > 0
       puts "Sorry, must be an integer greater than 0."
     end
-    @max_scores = scores
-    puts ''
+    @max_scores = scores.to_i
+    puts "Ok, let's play #{@max_scores} scores"
   end
 
   def final_winner
-    # binding.pry
     if human.score.value == @max_scores || computer.score.value == @max_scores
       human.score.value == @max_scores ? :human : :computer
     end
@@ -265,18 +253,9 @@ class RPSGame
       break if ['y', 'n'].include? answer
       puts "Sorry, must be y or n"
     end
+    reset_score
     return true if answer == 'y'
     false
-  end
-
-  def show_history
-    puts "#{human.history}"
-    puts "#{computer.history}"
-  end
-
-  def show_percentage
-    human.move_choosen_percentage
-    puts "#{human.percentage}"
   end
 
   def self.clear_screen
@@ -284,7 +263,6 @@ class RPSGame
   end
 
   def play
-
     display_welcome_message
     ask_for_score_to_win
     loop do
@@ -294,7 +272,6 @@ class RPSGame
         display_winner
         update_score
         show_score
-        show_history
         break if reach_winning_score?
       end
       break unless play_again?
@@ -304,9 +281,3 @@ class RPSGame
 end
 
 RPSGame.new.play
-
-# keeping score，ask play again if someone reach 10 points.
-# 只要滿足這個條件就算成立
-
-# 條件：human 某拳種出現機率大於50%就針對攻擊
-# 所以問題是出在沒有initialize?
