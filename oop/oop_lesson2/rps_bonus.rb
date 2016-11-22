@@ -227,7 +227,7 @@ class RPSGame
     scores = 0
     loop do
       scores = gets.chomp
-      break if !(scores =~ /\D/) && scores.to_i > 0
+      break if !(scores =~ /[\D|0]/)
       puts "Sorry, must be an integer greater than 0."
     end
     @max_scores = scores.to_i
