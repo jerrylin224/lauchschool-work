@@ -47,9 +47,10 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score, :history, :percentage
+  attr_accessor :move, :name, :score, :history, :percentage, :personalities
 
   def initialize
+    # binding.pry
     set_name
     self.score = Score.new
     @history = []
@@ -62,6 +63,14 @@ class Player
       hash[move] = self.history.count(move).to_f / self.history.size
     end
     hash
+  end
+
+  def decide_personality(string)
+    case string
+    when 'R2D2'      then R2D2.new
+    when 'Siri'      then Siri.new
+    when 'The Thing' then TheThing.new
+    end
   end
 
 
@@ -82,7 +91,7 @@ class Human < Player
 
     def human_percentage_over_50
     result = self.move_choosen_percentage.select do |move, percentage|
-      percentage >= 0.5
+      percentage >= 0.6
     end
     # binding.pry
     @@human_percentage = result.keys.shuffle.first
@@ -104,18 +113,65 @@ class Human < Player
 end
 
 class Computer < Player
+  attr_accessor :personalities
+
   def set_name
-    self.name = ['a', 'b', 'c'].sample
+    # binding.pry
+    self.name = ['The Thing'].sample
+    self.personalities = decide_personality(self.name) # R2D2.new
   end
+
+
+
 
   def choose
     # binding.pry
+    # @personalities = decide_personality('R2D2')
     if @@human_percentage != nil
       self.move = Move.new(LOSING_CONDITION[@@human_percentage].sample)
     else
-      self.move = Move.new(Move::VALUES.sample)
+      # self.move = Move.new(Move::VALUES.sample)
+      # binding.pry
+      self.move = Move.new(self.personalities.default)
     end
     self.history << self.move.value
+  end
+end
+
+class R2D2 < Computer
+  def initialize
+    # @personalities = ''
+  end
+
+  def default
+    case rand(1..6)
+    when (1..3) then 'rock'
+    when (4..5) then 'paper'
+    else             'scissors'
+    end
+  end
+end
+
+class Siri < Computer
+  def initialize
+    # @personalities = ''
+  end
+
+  def default
+    case rand(1..6)
+    when (1..3) then 'spock'
+    when (4..5) then 'rock'
+    else             'scissors'
+    end
+  end
+end
+
+class TheThing < Computer
+  def initialize
+    # @personalities = ''
+  end
+  def default
+    'rock'
   end
 end
 
@@ -239,3 +295,4 @@ RPSGame.new.play
 # 只要滿足這個條件就算成立
 
 # 條件：human 某拳種出現機率大於50%就針對攻擊
+# 所以問題是出在沒有initialize?
