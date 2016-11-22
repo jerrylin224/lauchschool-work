@@ -233,14 +233,27 @@ class RPSGame
     puts "#{computer.name} got #{computer.score.value} score"
   end
 
+  def ask_for_score_to_win
+    puts "How many scores should we play until?"
+    scores = 0
+    loop do
+      scores = gets.chomp.to_i
+      break if scores > 0
+      puts "Sorry, must be an integer greater than 0."
+    end
+    @max_scores = scores
+    puts ''
+  end
+
   def final_winner
-    if human.score.value == 5 || computer.score.value == 5
-      human.score.value == 5 ? :human : :computer
+    # binding.pry
+    if human.score.value == @max_scores || computer.score.value == @max_scores
+      human.score.value == @max_scores ? :human : :computer
     end
   end
 
   def display_final_winner_score
-    puts "#{final_winner} got 5 points, #{final_winner} won!"
+    puts "#{final_winner} got #{@max_scores} points, #{final_winner} won!"
   end
 
   def play_again?
@@ -273,6 +286,7 @@ class RPSGame
   def play
 
     display_welcome_message
+    ask_for_score_to_win
     loop do
       loop do
         human.choose
