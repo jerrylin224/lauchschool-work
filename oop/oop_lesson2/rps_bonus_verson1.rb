@@ -48,11 +48,12 @@ end
 
 class Player
   attr_accessor :move, :name, :score, :history, :percentage
+
   def initialize
     set_name
     self.score = Score.new
     @history = []
-    @@human_percentage = 0
+    @@human_percentage = ''
   end
 
   def move_choosen_percentage
@@ -70,6 +71,7 @@ class Human < Player
   def set_name
     n = ''
     loop do
+      RPSGame.clear_screen
       puts "What's your name?"
       n = gets.chomp
       break unless n.empty?
@@ -82,7 +84,8 @@ class Human < Player
     result = self.move_choosen_percentage.select do |move, percentage|
       percentage >= 0.5
     end
-    @@human_percentage = result.keys.first
+    # binding.pry
+    @@human_percentage = result.keys.shuffle.first
   end
 
   def choose
@@ -96,6 +99,7 @@ class Human < Player
     end
     self.move = Move.new(choice)
     self.history << self.move.value
+    RPSGame.clear_screen
   end
 end
 
@@ -105,6 +109,7 @@ class Computer < Player
   end
 
   def choose
+    # binding.pry
     if @@human_percentage != nil
       self.move = Move.new(LOSING_CONDITION[@@human_percentage].sample)
     else
@@ -205,7 +210,12 @@ class RPSGame
     puts "#{human.percentage}"
   end
 
+  def self.clear_screen
+    system('clear')
+  end
+
   def play
+
     display_welcome_message
     loop do
       loop do
