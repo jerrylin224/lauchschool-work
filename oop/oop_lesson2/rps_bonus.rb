@@ -98,7 +98,7 @@ class Human < Player
     human_percentage_over_50
     choice = ''
     loop do
-      puts "Please choose rock, scissors, paper, scissors or spock."
+      puts "Please choose rock, scissors, paper, lizard or spock."
       choice = gets.chomp
       break if Move::VALUES.include? choice
       puts "Invalid choice."
@@ -125,10 +125,7 @@ class Computer < Player
   end
 end
 
-class R2D2 < Computer
-  def initialize
-  end
-
+class R2D2 
   def default
     case rand(1..6)
     when (1..3) then 'rock'
@@ -138,10 +135,7 @@ class R2D2 < Computer
   end
 end
 
-class Siri < Computer
-  def initialize
-  end
-
+class Siri 
   def default
     case rand(1..6)
     when (1..3) then 'spock'
@@ -151,10 +145,7 @@ class Siri < Computer
   end
 end
 
-class TheThing < Computer
-  def initialize
-  end
-
+class TheThing
   def default
     'rock'
   end
