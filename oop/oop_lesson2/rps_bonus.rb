@@ -1,270 +1,379 @@
-require 'pry'
+OPTIONS = %w(rock scissors paper lizard spock).freeze
+
 WINNING_CONDITION = {
-  'rock' => %w(scissors lizard),
-  'paper' => %w(rock spock),
-  'scissors' => %w(paper lizard),
-  'spock' => %w(rock scissors),
-  'lizard' => %w(paper spock)
+  'rock' => %w(scissors lizard), 'paper' => %w(rock spock),
+  'scissors' => %w(paper lizard), 'lizard' => %w(spock paper),
+  'spock' => %w(rock scissors)
 }.freeze
 
 LOSING_CONDITION = {
-  'rock' => %w(paper spock),
-  'paper' => %w(scissors lizard),
-  'scissors' => %w(rock spock),
-  'spock' => %w(paper lizard),
-  'lizard' => %w(scissors spock)
+  'rock' => %w(paper spock), 'paper' => %w(scissors lizard),
+  'scissors' => %w(rock spock), 'lizard' => %w(scissors rock),
+  'spock' => %w(lizard paper)
 }.freeze
-class Score
-  attr_accessor :value
+
+SHORT_CUT = {
+  'r' => 'rock', 'p' => 'paper', 's' => 'scissors', 'li' => 'lizard',
+  'sp' => 'spock'
+}.freeze
+
+class History
+  attr_reader :value
 
   def initialize
-    @value = 0
+    @value = { human: [], computer: [] }
   end
 
-  def increment_score
-    @value += 1
+  def [](key)
+    @value[key]
+  end
+
+  def to_s
+    @value
   end
 end
 
 class Move
-  attr_accessor :value
-  VALUES = ['rock', 'scissors', 'paper', 'lizard', 'spock'].freeze
+  attr_reader :value
 
   def initialize(value)
     @value = value
   end
 
   def to_s
-    @value
+    value
   end
 
-  def >(other_choice)
-    WINNING_CONDITION[value].include?(other_choice.value)
+  def >(other_move)
+    WINNING_CONDITION[value].include?(other_move.value)
   end
 
-  def <(other_choice)
-    WINNING_CONDITION[other_choice.value].include?(value)
+  def <(other_move)
+    other_move > self
   end
 end
 
 class Player
-  attr_accessor :move, :name, :score, :history, :percentage, :personalities
+  attr_accessor :move, :name, :score, :history
 
-  def initialize
-    set_name
-    self.score = Score.new
-    @history = []
-    @@human_percentage = ''
+  def initialize(history)
+    @history = history
   end
 
-  def move_choosen_percentage
-    hash = {}
-    history.each do |move|
-      hash[move] = history.count(move).to_f / history.size
+  def move_percentage(player)
+    move_history = history.value[player]
+    result = move_history.uniq.select do |move|
+      move_history.count(move).to_f / move_history.size >= 0.5
     end
-    hash
-  end
-
-  def decide_personality(string)
-    case string
-    when 'R2D2'      then R2D2.new
-    when 'Siri'      then Siri.new
-    when 'The Thing' then TheThing.new
-    end
+    result.sample
   end
 end
 
 class Human < Player
-  def set_name
-    n = ''
-    loop do
-      RPSGame.clear_screen
-      puts "What's your name?"
-      n = gets.chomp
-      break unless n.empty?
-      puts "Sorry, must enter a value."
-    end
-    self.name = n
-  end
-
-  def human_percentage_over_50
-    result = move_choosen_percentage.select do |_, percentage|
-      percentage >= 0.6
-    end
-    @@human_percentage = result.keys.sample
-  end
-
   def choose
-    human_percentage_over_50
-    choice = ''
+    choice = nil
     loop do
-      puts "Please choose rock, scissors, paper, lizard or spock."
-      choice = gets.chomp
-      break if Move::VALUES.include? choice
-      puts "Invalid choice."
+      puts "Choose your move (r)for Rock, (s)scissors, (p)for paper, " \
+      "(li)for lizard, and  (sp)for spock"
+      choice = gets.chomp.downcase
+      break if SHORT_CUT.keys.include? choice
+      puts "Sorry, must be a valid choice"
     end
-    self.move = Move.new(choice)
-    history << move.value
-    RPSGame.clear_screen
+    self.move = Move.new(SHORT_CUT[choice])
   end
 end
 
 class Computer < Player
-  def set_name
-    self.name = ['R2D2', 'Siri', 'The Thing'].sample
-    self.personalities = decide_personality(name)
+  def initialize(history)
+    super
+    set_name
+  end
+
+  def inteligence
+    case set_name
+    when 'R2D2'    then R2D2.new
+    when 'Siri'    then Siri.new
+    when 'Whatson' then Whatson.new
+    end
   end
 
   def choose
-    if !@@human_percentage.nil?
-      self.move = Move.new(LOSING_CONDITION[@@human_percentage].sample)
+    if !move_percentage(:human).nil?
+      self.move = Move.new(LOSING_CONDITION[move_percentage(:human)].sample)
     else
-      self.move = Move.new(personalities.default)
+      self.move = Move.new(inteligence.value)
     end
-    history << move.value
+  end
+
+  def set_name
+    self.name = %w(R2D2 Whatson Siri).sample
   end
 end
 
-class R2D2 
-  def default
-    case rand(1..6)
-    when (1..3) then 'rock'
-    when (4..5) then 'paper'
-    else             'scissors'
-    end
+class R2D2
+  attr_accessor :value
+
+  def initialize
+    set_value
+  end
+
+  def set_value
+    self.value = case rand(1..10)
+                 when 1..5 then 'paper'
+                 when 6..9 then 'rock'
+                 when 10   then 'scissors'
+                 end
   end
 end
 
-class Siri 
-  def default
-    case rand(1..6)
-    when (1..3) then 'spock'
-    when (4..5) then 'rock'
-    else             'scissors'
-    end
+class Siri
+  attr_accessor :value
+
+  def initialize
+    set_value
+  end
+
+  def set_value
+    self.value = case rand(1..10)
+                 when 1..2  then 'lizard'
+                 when 3..4  then 'spock'
+                 when 5..6  then 'rock'
+                 when 7..10 then 'scissors'
+                 end
   end
 end
 
-class TheThing
-  def default
-    'rock'
+class Whatson
+  attr_accessor :value
+
+  def initialize
+    set_value
+  end
+
+  def set_value
+    self.value = case rand(1..10)
+                 when 1..4 then 'lizard'
+                 when 5..8 then 'spock'
+                 when 10   then 'paper'
+                 end
   end
 end
 
 class RPSGame
-  attr_accessor :human, :computer, :score
+  attr_accessor :human, :computer, :history, :max_point
 
   def initialize
-    @human = Human.new
-    @computer = Computer.new
-    @score = Score.new
+    history = History.new
+    @human = Human.new(history)
+    @computer = Computer.new(history)
+    @max_point = 0
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+    puts "Welcome to Rock, Scissors, Paper, Lizard, Spock."
+  end
+
+  def ask_player_name
+    answer = nil
+    loop do
+      puts "What's your name?"
+      answer = gets.chomp
+      break unless answer.empty?
+      puts "Sorry, must type a value"
+    end
+    human.name = answer
   end
 
   def display_goodbye_message
-    puts "Thanks for playing."
+    clear_screen
+    split_line(" SAYING GOODBYE ")
+    puts "Thanks for playing Rock, Scissors, Paper, Lizard, Spock. Goodbye."
   end
 
-  def player_choice
+  def display_move
     puts "#{human.name} chose #{human.move}"
     puts "#{computer.name} chose #{computer.move}"
+    puts ""
   end
 
-  def decide_round_winner
+  def decide_winner
     if human.move > computer.move
-      :human
+      :win
     elsif human.move < computer.move
-      :computer
+      :lose
     else
       :tie
     end
   end
 
-  def display_winner
-    player_choice
-    case decide_round_winner
-    when :human then puts "#{human.name} won!"
-    when :computer then puts "#{computer.name} won!"
-    when :tie then puts "It's a tie!"
-    end
-  end
-
   def update_score
-    case decide_round_winner
-    when :human then human.score.increment_score
-    when :computer then computer.score.increment_score
+    case decide_winner
+    when :win  then human.score += 1
+    when :lose then computer.score += 1
     end
   end
 
-  def reset_score
-    human.score.value = 0
-    computer.score.value = 0
-  end
-
-  def reach_winning_score?
-    !!final_winner
-  end
-
-  def show_score
-    puts "#{human.name} got #{human.score.value} score."
-    puts "#{computer.name} got #{computer.score.value} score"
-  end
-
-  def ask_for_score_to_win
-    puts "How many scores should we play until?"
-    scores = 0
+  def ask_for_stop_point
+    answer = nil
     loop do
-      scores = gets.chomp
-      break if !(scores =~ /[\D|0]/)
-      puts "Sorry, must be an integer greater than 0."
+      puts "How many scores should we play until?"
+      answer = gets.chomp
+      break if !(answer =~ /[\D|0]/)
+      puts "Sorry, must be an integer greater than 1."
     end
-    @max_scores = scores.to_i
-    puts "Ok, let's play #{@max_scores} scores"
+    self.max_point = answer.to_i
+    puts "Ok, let's play #{max_point}"
   end
 
-  def final_winner
-    if human.score.value == @max_scores || computer.score.value == @max_scores
-      human.score.value == @max_scores ? :human : :computer
+  def display_score
+    case decide_winner
+    when :win
+      puts "#{human.name} got #{human.score} scores"
+    when :lose
+      puts "#{computer.name} got #{computer.score} scores"
+    when :tie
+      puts "No noe got score"
     end
   end
 
-  def display_final_winner_score
-    puts "#{final_winner} got #{@max_scores} points, #{final_winner} won!"
+  def display_winner
+    case decide_winner
+    when :win  then puts "You won this round!"
+    when :lose then puts "Computer won this round!"
+    when :tie  then puts "It's a tie"
+    end
+  end
+
+  def human_match_max_point?
+    human.score == max_point
+  end
+
+  def computer_march_max_point?
+    computer.score == max_point
+  end
+
+  def match_stop_point?
+    human_match_max_point? || computer_march_max_point?
+  end
+
+  def display_final_winner
+    split_line(" GAME RESULT ")
+    puts ""
+    if human_match_max_point?
+      puts "#{human.name} are the game winner!"
+    elsif computer_march_max_point?
+      puts "#{computer.name} is the game winner!"
+    end
   end
 
   def play_again?
-    display_final_winner_score
-    puts "Would you like to play again? (y/n)"
-    answer = ''
+    answer = nil
     loop do
+      puts "Do you want to play again? (y/n)"
       answer = gets.chomp.downcase
-      break if ['y', 'n'].include? answer
-      puts "Sorry, must be y or n"
+      break if %w(y n).include? answer
+      puts "Sorry, must be a valid answer."
     end
-    reset_score
-    return true if answer == 'y'
-    false
+    answer == 'y'
   end
 
-  def self.clear_screen
-    system('clear')
+  def reset_score
+    human.score = 0
+    computer.score = 0
+  end
+
+  def clear_screen
+    system 'clear'
+  end
+
+  def split_line(string)
+    puts ""
+    puts string.center(38, '-')
+  end
+
+  def game_result_split_line
+    puts ""
+    puts "------------ GAME RESULT -------------"
+  end
+
+  def press_to_next_round
+    split_line("")
+    puts "Press enter to continue; type (q) to quit; type (h) for history."
+    answer = gets.chomp
+    case answer
+    when 'q' then 0
+    when 'h' then display_history
+    else          1
+    end
+  end
+
+  def display_recored_score
+    puts "#{human.name} got: #{human.score}. Copmuter got: #{computer.score}."
+    puts "#{max_point - [human.score, computer.score].max} scores to go."
+    puts ""
+  end
+
+  def update_move_history
+    human.history[:human] << human.move.value
+    computer.history[:computer] << computer.move.value
+  end
+
+  def display_history
+    clear_screen
+    split_line(' GAME HISTORY ')
+    puts "Human: #{human.history.value[:human]}"
+    puts "Computer: #{computer.history.value[:computer]}"
+    press_to_next_round
+  end
+
+  def welcom_the_player
+    clear_screen
+    split_line(" WELCOME ")
+    display_welcome_message
+    ask_player_name
+  end
+
+  def ask_for_typing_score
+    clear_screen
+    split_line(" TYPE A SCORE ")
+    ask_for_stop_point
+    reset_score
+  end
+
+  def game_message
+    split_line(" ROUND RESULT ")
+    update_score
+    display_recored_score
+    display_move
+    display_winner
+    display_score
+    update_move_history
+    human.move_percentage(:human)
+  end
+
+  def plyer_choose
+    computer.choose
+    human.choose
+  end
+
+  def score_information
+    clear_screen
+    split_line(" GAME START ")
+    display_recored_score
+    plyer_choose
+    clear_screen
   end
 
   def play
-    display_welcome_message
-    ask_for_score_to_win
+    welcom_the_player
     loop do
+      ask_for_typing_score
       loop do
-        human.choose
-        computer.choose
-        display_winner
-        update_score
-        show_score
-        break if reach_winning_score?
+        score_information
+        game_message
+        break if match_stop_point? || press_to_next_round.zero?
       end
+      display_final_winner
       break unless play_again?
     end
     display_goodbye_message
