@@ -187,7 +187,7 @@ class RPSGame
   def display_goodbye_message
     clear_screen
     split_line(" SAYING GOODBYE ")
-    puts "Thanks for playing Rock, Scissors, Paper, Lizard, Spock. Goodbye."
+    puts "Thanks for playing Rock, Scissors, Paper, Lizard, Spock. Goodbye!"
   end
 
   def display_move
@@ -289,11 +289,6 @@ class RPSGame
   def split_line(string)
     puts ""
     puts string.center(38, '-')
-  end
-
-  def game_result_split_line
-    puts ""
-    puts "------------ GAME RESULT -------------"
   end
 
   def press_to_next_round
