@@ -274,6 +274,7 @@ module DisplayGameMessage
 
   def display_finnal_winner
     system "clear"
+    puts "---------------- GAME RESULT ----------------"
     if human_win?
       puts "#{human.name} reached the winning score."
       puts "#{human.name} is the fianl winner!"
@@ -316,7 +317,7 @@ module DisplayGameMessage
 
   def display_how_many_score_left
     puts "#{@winning_score - [human.score, computer.score].max}"\
-     "scores to go."
+     " scores to go."
   end
 end
 
