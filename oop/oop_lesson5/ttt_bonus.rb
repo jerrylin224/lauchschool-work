@@ -64,9 +64,11 @@ class Board
       squares_in_line = brd.squares.values_at(*line)
       next unless squares_in_line.collect(&:marker).count(marker) == 2 &&
                   squares_in_line.select(&:unmarked?).count == 1
+
       square_num = line.select do |num|
         brd.squares[num].marker == Square::INITIAL_MARKER
       end
+
       return square_num.first
     end
     nil
@@ -107,27 +109,11 @@ class Square
   end
 end
 
-class Marker
-  attr_accessor :value
-
-  def initialize
-    @value = { human: ' ', computer: ' ' }
-  end
-
-  def [](key)
-    @value[key]
-  end
-
-  def []=(key, mark)
-    @value[key] = mark
-  end
-end
-
 class Player
   attr_accessor :score, :name, :marker
 
-  def initialize(marker)
-    @marker = marker
+  def initialize
+    @marker = nil
     @name = nil
   end
 end
@@ -139,10 +125,11 @@ class Human < Player
     loop do
       square = gets.chomp.to_i
       break if brd.unmarked_keys.include?(square)
+
       puts "Sorry, that's not a valid choice."
     end
 
-    brd[square] = marker.value[:human]
+    brd[square] = marker
   end
 
   def joinor(arr, delimiter=', ', word='or')
@@ -154,18 +141,18 @@ end
 class Computer < Player
   COMPUTER_NAME = ['Alphago', 'Deep Blue', 'Skynet'].freeze
 
-  def initialize(marker)
+  def initialize
     super
     @name = COMPUTER_NAME.sample
   end
 
-  def move(brd)
-    square = brd.find_at_risk_square(brd, marker.value[:computer]) ||
-             brd.find_at_risk_square(brd, marker.value[:human]) ||
+  def move(brd, other_marker)
+    square = brd.find_at_risk_square(brd, marker) ||
+             brd.find_at_risk_square(brd, other_marker) ||
              brd.place_center ||
              brd.unmarked_keys.sample
 
-    brd[square] = marker.value[:computer]
+    brd[square] = marker
   end
 end
 
@@ -188,33 +175,36 @@ module PlayerQuestions
       puts "What's your name?"
       name = gets.chomp.strip
       break unless name.empty?
+
       puts "Sorry, you must enter a name."
     end
+
     puts ""
     human.name = name
   end
 
   def decide_computer_marker
-    computer.marker.value[:computer] = if ask_for_player_marker == 'X'
-                                         'O'
-                                       else
-                                         'X'
-                                       end
+    computer.marker = if ask_for_player_marker == 'X'
+                        'O'
+                      else
+                        'X'
+                      end
   end
 
   def ask_for_player_marker
-    puts "What would you like your marker to be? (1) for 'X', (2) for 'O'"
+    puts "What would you like your marker to be? (X) for X, (O) for O"
     answer = nil
     loop do
-      answer = gets.chomp
-      break if %w(1 2).include? answer
-      puts "Sorry, must type 1 or 2."
+      answer = gets.chomp.downcase
+      break if %w(x o).include? answer
+
+      puts "Sorry, must type X or O."
     end
-    human.marker.value[:human] = if answer == 1
-                                   'X'
-                                 else
-                                   'O'
-                                 end
+    human.marker = if answer == 'x'
+                     'X'
+                   else
+                     'O'
+                   end
   end
 
   def ask_for_max_score
@@ -223,8 +213,10 @@ module PlayerQuestions
     loop do
       points = gets.chomp
       break if !(points =~ /[\D|0]/)
+
       puts "Sorry, please enter an integer greater than 0."
     end
+
     puts ""
     @winning_score = points.to_i
   end
@@ -236,40 +228,54 @@ module PlayerQuestions
       "(l) for last, and (r) for random."
       answer = gets.chomp.downcase
       break if %w(f l r).include? answer
+
       puts "Sorry, must be a valid choice"
     end
+
     @current_marker = decide_who_goes_first(answer)
     @recorded_marker = @current_marker
   end
 
   def decide_who_goes_first(answer)
     case answer
-    when 'f' then human.marker.value[:human]
-    when 'l' then computer.marker.value[:computer]
-    when 'r' then human.marker.value.keys.sample
+    when 'f' then human.marker
+    when 'l' then computer.marker
+    when 'r' then [human.marker, computer.marker].sample
     end
   end
 end
 
 module DisplayGameMessage
-  def display_result
+  def decide_round_winner
     case board.winning_marker
-    when human.marker.value[:human]       then puts "You won!"
-    when computer.marker.value[:computer] then puts "#{computer.name} won!"
-    else                                       puts "It's a tie!"
+    when human.marker    then puts "You won!"
+    when computer.marker then puts "#{computer.name} won!"
+    else                      puts "It's a tie!"
     end
-    display_next_round_message
   end
 
-  def display_next_round_message
-    puts "Press enter to start the next round."
+  def display_result
+    decide_round_winner
+  end
+
+  def next_round_or_break
+    puts "Press enter to start the next round, or (q) to quit."
     answer = gets.chomp
+
+    case answer
+    when 'q' then 0
+    else          1
+    end
+  end
+
+  def play_again_nessage
+    puts "Let's play again!"
+    puts ""
   end
 
   def display_play_again_message
     reset
-    puts "Let's play again!"
-    puts ""
+    play_again_nessage
   end
 
   def display_finnal_winner
@@ -278,16 +284,22 @@ module DisplayGameMessage
     if human_win?
       puts "#{human.name} reached the winning score."
       puts "#{human.name} is the fianl winner!"
-    else
+    elsif computer_win?
       puts "#{computer.name} reached the winning score."
       puts "#{computer.name} is the finnal winner!"
+    else
+      puts "You quit the game."
     end
+  end
+
+  def welcome_message
+    puts "Welcome to Tic Tac Toe!"
+    puts ""
   end
 
   def display_welcome_message
     clear
-    puts "Welcome to Tic Tac Toe!"
-    puts ""
+    welcome_message
     ask_for_name
   end
 
@@ -301,8 +313,8 @@ module DisplayGameMessage
   end
 
   def display_score_information
-    puts "You're a #{human.marker.value[:human]}. #{computer.name} "\
-      "is a #{computer.marker.value[:computer]}."
+    puts "You're a #{human.marker}. #{computer.name} "\
+      "is a #{computer.marker}."
     puts "You got #{human.score} scores. #{computer.name} got"\
       " #{computer.score} scores."
   end
@@ -328,10 +340,9 @@ class TTTGame
   attr_reader :board, :human, :computer
 
   def initialize
-    marker = Marker.new
     @board = Board.new
-    @human = Human.new(marker)
-    @computer = Computer.new(marker)
+    @human = Human.new
+    @computer = Computer.new
   end
 
   def play
@@ -342,10 +353,11 @@ class TTTGame
         board_setting
         play_one_round
         display_result
-        break if match_winning_point?
+        break if match_winning_point? || next_round_or_break.zero?
       end
       display_finnal_winner
       break unless play_again?
+
       display_play_again_message
     end
     display_goodbye_message
@@ -369,16 +381,16 @@ class TTTGame
   end
 
   def human_turn?
-    @current_marker == human.marker.value[:human]
+    @current_marker == human.marker
   end
 
   def current_player_moves
     if human_turn?
       human.move(board)
-      @current_marker = computer.marker.value[:computer]
+      @current_marker = computer.marker
     else
-      computer.move(board)
-      @current_marker = human.marker.value[:human]
+      computer.move(board, human.marker)
+      @current_marker = human.marker
     end
   end
 
@@ -388,6 +400,7 @@ class TTTGame
       puts "#{human.name}, would you like to play again? (y/n)"
       answer = gets.chomp.downcase
       break if %w(y n).include? answer
+
       puts "Sorry, must be y or n."
     end
 
@@ -417,9 +430,9 @@ class TTTGame
 
   def update_score
     case board.winning_marker
-    when human.marker.value[:human]
+    when human.marker
       human.score += 1
-    when computer.marker.value[:computer]
+    when computer.marker
       computer.score += 1
     end
   end
