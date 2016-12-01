@@ -1,4 +1,3 @@
-require 'pry'
 class Participant
   MAX_POINTS = 21
 
@@ -296,7 +295,6 @@ class TwentyOne
   include GameState
 
   attr_reader :deck, :max_score, :player, :dealer
-  # attr_accessor :player, :dealer
 
   def initialize
     @deck = Deck.new
