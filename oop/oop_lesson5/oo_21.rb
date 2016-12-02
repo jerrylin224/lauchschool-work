@@ -37,6 +37,10 @@ class Participant
   def busted?
     total_values > 21
   end
+
+  def receive_card(card)
+    cards <<  card
+  end
 end
 
 class Player < Participant
@@ -51,6 +55,24 @@ class Player < Participant
     end
 
     self.name = answer
+  end
+
+  def hit_or_stay
+    answer = nil
+    loop do
+      print "#{name}, would you like to hit or stay? "
+      puts  "(h) for hit, (s) for stay."
+      answer = gets.chomp.downcase
+      break if %w(h s).include? answer
+
+      puts "Sorry, must be a valid choice."
+    end
+    answer
+  end
+
+  def go_next_round
+    puts "Press enter to go next."
+    gets.chomp
   end
 end
 
@@ -92,10 +114,15 @@ module GameMessages
     puts "Thanks for playing. Goodbye!"
   end
 
-  def display_current_cards
-    display_player_cards_in_hand
-    puts "#{dealer.name} has #{dealer.cards.first} and a hidden card."
-    puts ""
+  def display_current_cards(hidden)
+    if hidden == true
+      display_player_cards_in_hand
+      puts "#{dealer.name} has #{dealer.cards.first} and a hidden card."
+      puts ""
+    elsif hidden == false
+      display_player_cards_in_hand
+      display_dealer_cards_in_hand
+    end
   end
 
   def display_dealer_next_card
@@ -104,23 +131,18 @@ module GameMessages
   end
 
   def display_player_cards_in_hand
-    puts "#{player.name} has #{player.cards} and "\
-    "#{player.total_values} points in hands."
+    print "#{player.name} has #{player.cards} and "
+    puts  "#{player.total_values} points in hands."
   end
 
   def display_dealer_cards_in_hand
-    puts "#{dealer.name} has #{dealer.cards} and "\
-    "#{dealer.total_values} points in hands."
-  end
-
-  def display_non_hidden_card
-    display_player_cards_in_hand
-    display_dealer_cards_in_hand
+    print "#{dealer.name} has #{dealer.cards} and "
+    puts  "#{dealer.total_values} points in hands."
   end
 
   def display_current_score
-    puts "#{player.name} got #{player.score} score."\
-     " #{dealer.name} got #{dealer.score} scores."
+    print "#{player.name} got #{player.score} score."
+    puts  " #{dealer.name} got #{dealer.score} scores."
     puts "#{@max_score - [player.score, dealer.score].max} score to go."
     puts ""
   end
@@ -132,54 +154,20 @@ module GameMessages
 
   def display_compare_result
     case compare_score
-    when :player then puts "#{player.name}'s points is greater "\
-      "than #{dealer.name}'s, #{player.name} won!"
-    when :dealer then puts "#{dealer.name}'s points is greater "\
-      "than #{player.name}'s, #{dealer.name} won!"
-    when :tie    then puts "It's a tie!"
+    when :player
+      puts "#{player.name}'s points is greater "\
+        "than #{dealer.name}'s, #{player.name} won!"
+    when :dealer
+      puts "#{dealer.name}'s points is greater "\
+        "than #{player.name}'s, #{dealer.name} won!"
+    else
+      puts "It's a tie!"
     end
   end
 
   def display_current_cards_and_points
     display_current_score
-    display_current_cards
-  end
-end
-
-module PlayerQuestions
-  def ask_for_max_score
-    puts "How many points should we play until?"
-    answer = nil
-    loop do
-      answer = gets.chomp
-      break if !(answer =~ /[\D|0|]/)
-
-      puts "Sorry, must be an integer greater than 0."
-    end
-
-    @max_score = answer.to_i
-  end
-
-  def ask_for_next_round
-    puts "Press enter to go next."
-    gets.chomp
-  end
-
-  def ask_player_name
-    player.set_name
-  end
-
-  def ask_player_to_hit_or_stay
-    answer = nil
-    loop do
-      puts "#{player.name}, would you like to hit or stay? "\
-      "(h) for hit, (s) for stay."
-      answer = gets.chomp.downcase
-      break if %w(h s).include? answer
-
-      puts "Sorry, must be a valid choice."
-    end
-    answer
+    display_current_cards(true)
   end
 end
 
@@ -257,31 +245,23 @@ module GameState
 
   def someone_reach_winning_point?
     if player.win?(@max_score)
-      puts "#{player.name} reach the winning scores."\
-      " #{player.name} is the final winner!"
+      print "#{player.name} reach the winning scores."
+      puts  " #{player.name} is the final winner!"
     else
-      puts "#{dealer.name} reach the winning scores."\
-      " #{dealer.name} is the final winner!"
+      print "#{dealer.name} reach the winning scores."
+      puts  " #{dealer.name} is the final winner!"
     end
   end
 
-  def reach_winning_socre?
+  def reach_winning_score?
     player.win?(@max_score) || dealer.win?(@max_score)
   end
 
   def deal_two_cards_in_hand
     2.times do
-      player_draw_card
-      dealer_draw_card
+      player.receive_card(deck.deal)
+      dealer.receive_card(deck.deal)
     end
-  end
-
-  def player_draw_card
-    player.cards << deck.deal
-  end
-
-  def dealer_draw_card
-    dealer.cards << deck.deal
   end
 
   def clear_screen
@@ -291,7 +271,6 @@ end
 
 class TwentyOne
   include GameMessages
-  include PlayerQuestions
   include GameState
 
   attr_reader :deck, :max_score, :player, :dealer
@@ -302,28 +281,41 @@ class TwentyOne
     @dealer = Dealer.new
   end
 
+  def ask_for_max_score
+    puts "How many points should we play until?"
+    answer = nil
+    loop do
+      answer = gets.chomp
+      break if !(answer =~ /[\D|0|]/)
+
+      puts "Sorry, must be an integer greater than 0."
+    end
+
+    @max_score = answer.to_i
+  end
+
   def player_stay
     clear_screen
     display_current_score
-    display_current_cards
+    display_current_cards(true)
     puts "#{player.name} chose to stay."
     puts ""
   end
 
   def player_hit
     clear_screen
-    player_draw_card
+    player.receive_card(deck.deal)
     display_current_score
     if player.busted?
-      display_non_hidden_card
+      display_current_cards(false)
     else
-      display_current_cards
+      display_current_cards(true)
     end
   end
 
   def player_turn
     loop do
-      if ask_player_to_hit_or_stay == 's'
+      if player.hit_or_stay == 's'
         player_stay
         break
       elsif player.busted?
@@ -336,7 +328,7 @@ class TwentyOne
   end
 
   def dealer_hit
-    dealer_draw_card
+    dealer.receive_card(deck.deal)
     display_dealer_next_card
     display_dealer_cards_in_hand
   end
@@ -364,7 +356,7 @@ class TwentyOne
   def setting_game_information
     clear_screen
     display_welcome_message
-    ask_player_name
+    player.set_name
     display_dealer_name
     ask_for_max_score
   end
@@ -395,7 +387,7 @@ class TwentyOne
 
   def after_participant_turn
     update_score
-    ask_for_next_round
+    player.go_next_round
     clear_screen
   end
 
@@ -407,7 +399,7 @@ class TwentyOne
         before_participant_turn
         each_participant_turn
         after_participant_turn
-        break if reach_winning_socre?
+        break if reach_winning_score?
       end
       display_current_score
       someone_reach_winning_point?
