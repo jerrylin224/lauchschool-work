@@ -1,16 +1,4 @@
 class House
-  # def self.recite
-  #   song = ""
-  #   (1..pieces.size).each do |lines|
-  #     song += combine_pieces(pieces.last(lines))
-  #     if lines != pieces.size
-  #       song += "\n\n"
-  #     else
-  #       song += "\n"
-  #     end
-  #   end
-  # end
-
   def self.recite
     new.recite
   end
@@ -22,16 +10,6 @@ class House
               .join("\n\n")
     verse + "\n"
   end
-  # def self.combine_pieces(pieces)
-  #   line = "This is "
-  #   pieces.each do |piece|
-  #     line += piece[0]
-  #     line += "\n" if piece[1]
-  #     line += (piece[1] + ' ') if piece[1]
-  #   end
-
-  #   line + '.'
-  # end
 
   def combine_pieces(pieces)
     paragraph = pieces.map {|piece| piece.join("\n")}.join(" ")
@@ -57,11 +35,3 @@ class House
     ]
   end
 end
-
-# The first sentence start with 'This is'
-# "This is" + pieces[-1]
-# "This is" + pieces[-2][0] \n pieces[-2][1] + pieces[-1]
-# "This is" + pieces[-3][0] \n pieces[-3][1] + pieces[-2][0] \n pieces[-2][1] + pieces[-1]
-# "This is" + pieces[-4][0] \n pieces[-4][1] + pieces[-3][0] \n pieces[-3][1] + pieces[-2][0] \n pieces[-2][1] + pieces[-1]
-# house = House.new
-# house.pieces

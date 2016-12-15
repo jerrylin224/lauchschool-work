@@ -40,14 +40,3 @@ class PhoneNumber
      '(' + area_code + ') ' + central_office_code + '-' + line_code
   end
 end
-
-# puts PhoneNumber.new('456.123.7890').number
-# puts PhoneNumber.new('123-abc-1234').number
-# puts PhoneNumber.new('(987) 654-3210').number
-# puts PhoneNumber.new('(123) 456-7890').number
-# puts PhoneNumber.new('21234567890').number
-# puts PhoneNumber.new('9876543210').area_code
-
-# puts PhoneNumber.new('5551234567').to_s
-# # binding.pry
-# puts PhoneNumber.new('11234567890').to_s

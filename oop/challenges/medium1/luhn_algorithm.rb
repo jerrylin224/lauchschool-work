@@ -29,13 +29,3 @@ class Luhn
     num = remainder == 0 ? num * 10 : num * 10 + (10 - remainder)
   end
 end
-
-
-# p Luhn.new(12_121).addends
-
-# p Luhn.new(1230).addends
-# puts ""
-# puts Luhn.create(123)
-# puts ""
-
-# 右邊第一個數字都不會被影響，所以丟一個零進去，再看缺多少加多少。我的方法是乘以10加那個數字啦
