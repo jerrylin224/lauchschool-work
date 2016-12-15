@@ -11,7 +11,7 @@ total_male_age = 0
 #My answer
 munsters.each do |name, details|
   case details["gender"]
-  when "male"
+  when "male" 
     total_male_age += details["age"]  
   else
   end

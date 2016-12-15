@@ -133,6 +133,7 @@ loop do
     prompt "Dealer's cards are now: #{dealer_cards}"
   end
 
+  
   if busted?(dealer_cards)
     prompt "Dealer total is now: #{total(dealer_cards)}"
     display_result(dealer_cards, player_cards)

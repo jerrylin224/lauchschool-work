@@ -1,5 +1,3 @@
-
-
 def fib(first_num, second_num, limit_num)
   while second_num < limit_num
     sum = first_num + second_num

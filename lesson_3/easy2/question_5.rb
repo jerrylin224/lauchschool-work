@@ -4,4 +4,4 @@ additional_ages = { "Marilyn" => 22, "Spot" => 237 }
 
 ages.merge!(additional_ages)
 
-#.merge is used to merge hash
+#.merge is used to merge hash.Note remeber to add "!".

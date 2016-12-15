@@ -1,21 +1,23 @@
 # Using the following code, add an instance method named #rename that renames kitty when invoked.
 
-class Cat
-  attr_accessor :name
 
-  def initialize(name)
-    @name = name
+class Person
+  attr_writer :secret
+
+  def compare_secret(other)
+    secret == other.secret
   end
 
-  def rename(name)
-    @name = name    
-  end
+  protected
+
+  attr_reader :secret
 end
 
-kitty = Cat.new('Sophie')
-puts kitty.name
-kitty.rename('Chloe')
-puts kitty.name
+person1 = Person.new
+person1.secret = 'Shh.. this is a secret!'
+person2 = Person.new
+person2.secret = 'Shh.. this is a different secret!'
+person1.compare_secret(person2)
 
-# So weird...since we can use getter method,why should fo this?
-# Or because this is just designed for practicing???But is is so nonsense.
+
+# When invoking setter methods, they must be denoted with self

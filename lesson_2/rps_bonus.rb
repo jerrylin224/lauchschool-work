@@ -82,14 +82,8 @@ loop do
   loop do
     choice = ''
     loop do
-      player_choice_prompt = <<-MSG
-Choose one to play:
-    r for rock
-    p for paper
-    sc for scissors
-    l for lizard
-    sp for spock
-  MSG
+
+
       prompt(player_choice_prompt)
       choice = input_choice(gets.chomp)
       if VALID_CHOICE.include?(choice)

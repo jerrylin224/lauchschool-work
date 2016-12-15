@@ -10,7 +10,7 @@ class Student
   end
 
    
-  protected
+  protected # 不能用private的原因是內部會出現object.grade（造成無法存取的原因），但如果是用#protected就沒差（可以出現class name）
 
   def grade
     @grade

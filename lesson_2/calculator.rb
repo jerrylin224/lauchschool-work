@@ -10,9 +10,9 @@ def messages(message, lang='en')
   MESSAGES[lang][message]
 end
 
-def prompt(key)
+def prompt(key, cal)
   message = messages(key, LANGUAGE)   # make sure the "messages" method is declared above this line
-  Kernel.puts("=> #{message}")
+  Kernel.puts("=> #{message}" + "#{cal}")
 end
 
 def valid_number?(num)
@@ -44,7 +44,7 @@ def operation_to_message(op)
   end
 end
 
-prompt('welcome') 
+prompt('welcome', '') 
 
 name = ''
   loop do
@@ -56,31 +56,32 @@ name = ''
       break
     end
   end
+binding.pry
+prompt('show_name', 'name')
 
-prompt("Hi #{name}")
 
 loop do # main loop
   number1 = ''
   loop do
-  prompt('first_num')
+  prompt('first_num' '')
   number1 = gets().chomp()
   if valid_number?(number1)
     break
   else
-    prompt('not_valid')
+    prompt('not_valid' '')
   end
 
 end
 
   number2 = ''
 loop do
-prompt ('second_number')
+prompt ('second_number' '')
 number2 = gets().chomp()
 
   if valid_number?(number2)
     break
   else
-    prompt('not_valid')
+    prompt('not_valid', '')
   end
 end
 
@@ -124,9 +125,9 @@ result = case operator
 
 
 
-prompt ("Your number is #{result}.")
+prompt ('your_num' '#{result}')
 
-prompt ("Do you want to perform another calculation?(Y to calculate again)")
+prompt ('do_again' '')
 answer = gets().chomp()
 break unless answer.downcase().start_with?('y')
 # This is the situation we end the main loop.

@@ -18,6 +18,7 @@ def total(cards)
 
   sum = 0
   values.each do |value|
+    binding.pry
     sum += if value == "A"
              11
            elsif value.to_i.zero?
